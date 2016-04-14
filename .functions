@@ -51,6 +51,11 @@ echo '---'
 # $1 : folder name
 # $2 : remote host ip or path
 function mount_samba_share(){
+#TODO: verify cifs is working
+#TODO: verify remote host pingable
+#TODO: verify destination folder name exists && is writeable
+#TODO: verify remote share exists (is possible?)
+  echo $SYSTEM_USERNAME
   sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 /media/$SYSTEM_USERNAME/$1
 }
 
