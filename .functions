@@ -42,13 +42,6 @@ echo "Looping from $start to $end..."
       echo ''
     done
 echo '---'
-#  for i in {$1..$2}
-#    do
-#echo $i
-#printf $3 $i
-#echo ""
-    #  wget `printf $3 $i`
-#    done
 }
 
 # Mounts a Samba share in /media/username/sharename
