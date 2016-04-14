@@ -5,10 +5,9 @@
 #
 # Usage: move_files /source/folder *.log /dest/folder
 function move_files() {
-  # we need a defaults file here, to keep away from git
-  ${1:='/home/marco/Immagini'}
-  ${2:='Schermata*'}
-  ${3:='/media/marco/3XMount/myfreewebcams.com/Zh'}
+  ${1:=$SYSTEM_IMAGES_FOLDER}
+  ${2:=$SCREENSHOT_NAME_PATTERN}
+  ${3:=$SCREENSHOT_MV_TO}
   find $1 -name $2 -print0 | xargs -0 mv -t $3
 }
 
@@ -16,9 +15,8 @@ function move_files() {
 # $1 : source folder
 # $2 : dest folder
 function rsync_folders() {
-  # same here, defaults is needed
-  ${1:='/home/marco/Immagini'}
-  ${2:='/media/marco/3XMount/myfreewebcams.com/Zh'}
+  ${1:=$SYSTEM_IMAGES_FOLDER}
+  ${2:=$SCREENSHOT_MV_TO}
   # https://github.com/webpro/dotfiles has some optimizations for this command, take a look
   rsync -av --delete $1 $2
 }
@@ -42,11 +40,9 @@ function wget_incremental() {
 # (This function should not exist, because network mounts should live in /etc/fstab
 # At least the password must be digited by the user)
 # $1 : folder name
-# $2 : username
-# $3 : password
-# $4 : remote host ip or path
+# $2 : remote host ip or path
 function mount_samba_share(){
-  sudo mount -t cifs -o username=$2,password=$3 //$4/$1 /media/$2/$1
+  sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 /media/$SYSTEM_USERNAME/$1
 }
 
 # I like to take loads of screenshots..
@@ -61,33 +57,25 @@ function screenshot_rain() {
 	#save_path="/home/marco/Immagini/Schermata del `date +"%Y-%m-%d %r"`.png"
 	#in Ubuntu
 	#save_path="/media/marco/HOME0/Immagini/Schermata del `date +"%Y-%m-%d %r"`.png"
-	save_path=${2:="/media/marco/HOME0/Immagini/Schermata del `date +"%Y-%m-%d %r"`.png"}
+	save_path=${2:="$SYSTEM_IMAGES_FOLDER/$SCREENSHOT_NAME"}
 
-	watch -n $frequency 'import -window root "$save_path"'
+	watch -n $frequency "import -window root '$save_path'"
 }
 
 
 function mysql_dump_db(){
-  db_user='root'
-  db_pass='123'
-
-  mysqldump -u$db_user -p$db_pass $1 > ./dump-$1-`date +"%Y-%m-%d_%r"`.sql
+  mysqldump -u$MYSQL_ROOT_USERNAME -p$MYSQL_ROOT_PASSWORD $1 > ./dump-$1-`date +"%Y-%m-%d_%r"`.sql
 }
 
 function mysql_drop_db() {
-  db_user='root'
-  db_pass='123'
-  mysql -u$db_user -p$db_pass -e"DROP DATABASE $1"
+  mysql -u$MYSQL_ROOT_USERNAME -p$MYSQL_ROOT_PASSWORD -e"DROP DATABASE $1"
 }
 
 function mysql_restore_db(){
-  db_user='root'
-  db_pass='123'
-  mysql -u$db_user -p$db_pass $1 < $2
+  mysql -u$MYSQL_ROOT_USERNAME -p$MYSQL_ROOT_PASSWORD $1 < $2
 }
 
-function mysql_dump_structure()
-{
+function mysql_dump_structure() {
   mysqldump -Qc $@
 }
 
@@ -97,7 +85,7 @@ function mysql_dump_structure()
 # Script per la creazione di un file VirtualHost
 # author: Marco Bianco - Alura snc
 #
-usage()
+make_apache_virtual_host_help()
 {
 echo "Usage: `basename $0` -d percorso_document_root -s server_name [-o options]"
 }
@@ -126,7 +114,7 @@ function make_apache_virtual_host() {
   		DOCUMENT_ROOT="$OPTARG"
   	else
   		echo "DocumentRoot non valida. Esco."
-  		usage
+  		make_apache_virtual_host_help
   		exit
   	fi;;
       s )
@@ -139,13 +127,13 @@ function make_apache_virtual_host() {
 
   if [ "$DOCUMENT_ROOT" = "" ]; then
   	echo "DocumentRoot non puo' essere vuota. Esco"
-  	usage
+  	make_apache_virtual_host_help
   	exit
   fi
 
   if [ "$SERVER_NAME" = "" ]; then
   	echo "ServerName non puo' essere vuota. Esco"
-  	usage
+  	make_apache_virtual_host_help
   	exit
   fi
 
@@ -188,16 +176,6 @@ function make_apache_virtual_host() {
 #alias wget_loop='loop $1 $2 $3'
 #alias mount_network='mount_network_folder $1 $2 $3 $4'
 #alias screenshot_rain='take_multiple_screenshots $1 $2'
-
-
-#SERVICE_APACHE2='/etc/init.d/apache2'
-SERVICE_APACHE2='service apache2'
-alias a2reload='sudo $SERVICE_APACHE2 reload'
-alias a2restart='sudo $SERVICE_APACHE2 restart'
-
-alias getkey='gpg --keyserver keyserver.ubuntu.com --recv-keys $1 && gpg --export --armor $1 | sudo apt-key add - '
-alias crop-images='mogrify -crop $1+$2+$3 ./$4*.png'
-
 #alias mysql_drop='mysql_drop_db $1'
 #alias mysql_restore='mysql_restore_db $1 $2'
 #alias mysql_dump='mysql_dump_db $1'
