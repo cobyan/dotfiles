@@ -14,7 +14,7 @@ function move_files() {
 # RSync a folder
 # $1 : source folder
 # $2 : dest folder
-function rsync_folders() {
+function rsync_folders(){
   ${1:=$SYSTEM_IMAGES_FOLDER}
   ${2:=$SCREENSHOT_MV_TO}
   # https://github.com/webpro/dotfiles has some optimizations for this command, take a look
@@ -29,10 +29,19 @@ function rsync_folders() {
 #
 # Usage: wget_incremental 1 31 http://www.mysite.com/logs/2016-01-%d.txt
 function wget_incremental() {
-	for i in {$1..$2}
-	do
-		wget `printf $3 $i`
-	done
+echo "Bash version ${BASH_VERSION}..."
+
+local start=$(( ${1#0} +0 ))
+local end=$(( ${2#0} +0 ))
+
+echo "Looping from $start to $end..."
+
+  for i in $(eval echo {$start..$end}) 
+    do
+      printf $3 $i 
+      echo ''
+    done
+echo '---'
 }
 
 # Mounts a Samba share in /media/username/sharename
@@ -42,6 +51,11 @@ function wget_incremental() {
 # $1 : folder name
 # $2 : remote host ip or path
 function mount_samba_share(){
+#TODO: verify cifs is working
+#TODO: verify remote host pingable
+#TODO: verify destination folder name exists && is writeable
+#TODO: verify remote share exists (is possible?)
+  echo $SYSTEM_USERNAME
   sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 /media/$SYSTEM_USERNAME/$1
 }
 
