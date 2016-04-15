@@ -52,8 +52,12 @@ echo '---'
 # $2 : remote host ip or path
 function mount_samba_share(){
 
+  local mediaFolder="/media/$SYSTEM_USERNAME/$1"
+  local cifsCommand="/sbin/mount.cifs"
+  local mountRoot="/media/$SYSTEM_USERNAME"
+
   # verify cifs is working
-  if [ -x "/sbin/mount.cifs" ]; then
+  if [ -x $cifsCommand ]; then
     echo 'cifs OK'
   else
     echo 'cifs not found'
@@ -61,24 +65,29 @@ function mount_samba_share(){
   fi
 
   # verify remote host pingable
-  if ping -c 1 some_ip_here &> /dev/null
+  if ping -c 1 $2 &> /dev/null
   then
-    echo 'Remote host OK'
+    echo "Remote host $2 OK"
   else
-    echo 'Remote host unreachable'
+    echo "Remote host $2 unreachable"
   fi
 
   # verify destination folder name exists && is writeable
-  if [ -d "/media/$SYSTEM_USERNAME/$1" ]; then
-    echo 'Target folder OK'
+  if [ -d $mediaFolder ]; then
+    echo "Target folder $mediaFolder OK"
   else
-    echo 'Target folder not found'
+    echo "Target folder $mediaFolder not found"
   fi
 
-  #TODO: verify remote share exists (is possible?)
-
   echo "Mounting folder share $1 on host $2 for $SYSTEM_USERNAME"
-  sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 /media/$SYSTEM_USERNAME/$1
+
+  # mounting folder
+  if sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 $mountRoot/$SYSTEM_USERNAME/$1 &>/dev/null
+  then
+    echo "mount OK"
+  else
+    echo "mount failed"
+  fi
 }
 
 # I like to take loads of screenshots..
