@@ -36,9 +36,9 @@ local end=$(( ${2#0} +0 ))
 
 echo "Looping from $start to $end..."
 
-  for i in $(eval echo {$start..$end}) 
+  for i in $(eval echo {$start..$end})
     do
-      printf $3 $i 
+      printf $3 $i
       echo ''
     done
 echo '---'
@@ -51,17 +51,33 @@ echo '---'
 # $1 : folder name
 # $2 : remote host ip or path
 function mount_samba_share(){
-#TODO: verify cifs is working
+
+  # verify cifs is working
   if [ -x "/sbin/mount.cifs" ]; then
     echo 'cifs OK'
   else
     echo 'cifs not found'
+    exit
   fi
 
-#TODO: verify remote host pingable
-#TODO: verify destination folder name exists && is writeable
-#TODO: verify remote share exists (is possible?)
-  echo $SYSTEM_USERNAME
+  # verify remote host pingable
+  if ping -c 1 some_ip_here &> /dev/null
+  then
+    echo 'Remote host OK'
+  else
+    echo 'Remote host unreachable'
+  fi
+
+  # verify destination folder name exists && is writeable
+  if [ -d "/media/$SYSTEM_USERNAME/$1" ]; then
+    echo 'Target folder OK'
+  else
+    echo 'Target folder not found'
+  fi
+
+  #TODO: verify remote share exists (is possible?)
+
+  echo "Mounting folder share $1 on host $2 for $SYSTEM_USERNAME"
   sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 /media/$SYSTEM_USERNAME/$1
 }
 
