@@ -91,7 +91,7 @@ function mount_samba_share(){
   echo "Mounting folder share $1 on host $2 for $SYSTEM_USERNAME"
 
   # mounting folder
-  local mountCommand=`sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 $mountRoot/$SYSTEM_USERNAME/$1 &>/dev/null`
+  local mountCommand=`sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 $mountRoot/$1 &>/dev/null`
 
   if $mountCommand
   then
