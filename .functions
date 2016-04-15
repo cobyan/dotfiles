@@ -52,6 +52,12 @@ echo '---'
 # $2 : remote host ip or path
 function mount_samba_share(){
 #TODO: verify cifs is working
+  if [ -x "/sbin/mount.cifs" ]; then
+    echo 'cifs OK'
+  else
+    echo 'cifs not found'
+  fi
+
 #TODO: verify remote host pingable
 #TODO: verify destination folder name exists && is writeable
 #TODO: verify remote share exists (is possible?)
