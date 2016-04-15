@@ -1,0 +1,11 @@
+SERVICE_APACHE2='service apache2'
+SYSTEM_USERNAME='username'
+SYSTEM_PASSWORD='password'
+MYSQL_ROOT_USERNAME='root'
+MYSQL_ROOT_PASSWORD='123'
+
+SYSTEM_IMAGES_FOLDER='/home/username/Immagini'
+
+SCREENSHOT_NAME_PATTERN='Schermata*'
+SCREENSHOT_MV_TO='/media/username/destination/path'
+SCREENSHOT_NAME='Schermata del `date +"%Y-%m-%d %r"`.png'
