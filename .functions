@@ -61,7 +61,7 @@ function mount_samba_share(){
     echo 'cifs OK'
   else
     echo 'cifs not found'
-    exit
+    return 1
   fi
 
   # verify remote host pingable
@@ -70,23 +70,36 @@ function mount_samba_share(){
     echo "Remote host $2 OK"
   else
     echo "Remote host $2 unreachable"
+    return 1
   fi
 
   # verify destination folder name exists && is writeable
   if [ -d $mediaFolder ]; then
     echo "Target folder $mediaFolder OK"
   else
-    echo "Target folder $mediaFolder not found"
+
+    if confirm "Target folder $mediaFolder not found. Do you wish to create it? [Y/n]"
+    then
+      echo "create folder $mediaFolder"
+      sudo mkdir $mediaFolder
+    else
+      return 1
+    fi
+
   fi
 
   echo "Mounting folder share $1 on host $2 for $SYSTEM_USERNAME"
 
   # mounting folder
-  if sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 $mountRoot/$SYSTEM_USERNAME/$1 &>/dev/null
+  local mountCommand=`sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 $mountRoot/$SYSTEM_USERNAME/$1 &>/dev/null`
+
+  if $mountCommand
   then
-    echo "mount OK"
+    echo 'mount OK'
+    return 1
   else
     echo "mount failed"
+    return 0
   fi
 }
 
@@ -225,3 +238,17 @@ function make_apache_virtual_host() {
 #alias mysql_restore='mysql_restore_db $1 $2'
 #alias mysql_dump='mysql_dump_db $1'
 #alias mysql_dump_structure='mysql_dump_db_structure $@'
+
+# http://stackoverflow.com/questions/3231804/in-bash-how-to-add-are-you-sure-y-n-to-any-command-or-alias
+confirm () {
+    # call with a prompt string or use a default
+    read -r -p "${1:-Are you sure? [y/N]} " response
+    case $response in
+        [yY][eE][sS]|[yY])
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
