@@ -1,4 +1,4 @@
-#for file in ~/dotfiles/.{path,bash_prompt,exports,aliases,functions,extra}; do
+
 if ( [ -e $PWD/.defaults.dist ] && [ ! -e $PWD/.defaults ] ); then
 	tput bold
 	tput setaf 1
