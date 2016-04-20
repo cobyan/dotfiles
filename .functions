@@ -5,10 +5,41 @@
 #
 # Usage: move_files /source/folder *.log /dest/folder
 function move_files() {
-  ${1:=$SYSTEM_IMAGES_FOLDER}
-  ${2:=$SCREENSHOT_NAME_PATTERN}
-  ${3:=$SCREENSHOT_MV_TO}
-  find $1 -name $2 -print0 | xargs -0 mv -t $3
+
+  for i in "$@"
+  do
+  case $i in
+      -s=*|--source=*)
+      SOURCE_FOLDER="${i#*=}"
+      shift # past argument=value
+      ;;
+      -f=*|--filename=*)
+      FILENAME_PATTERN="${i#*=}"
+      shift # past argument=value
+      ;;
+      -t=*|--target=*)
+      TARGET_PATH="${i#*=}"
+      shift # past argument=value
+      ;;
+      *)
+      echo "Unknown option"  # unknown option
+      ;;
+  esac
+  done
+
+  if [ "$SOURCE_FOLDER" == "" ]; then
+    SOURCE_FOLDER=$SYSTEM_IMAGES_FOLDER
+  fi
+
+  if [ "$FILENAME_PATTERN" == "" ]; then
+    FILENAME_PATTERN=$SCREENSHOT_NAME_PATTERN
+  fi
+
+  if [ "$TARGET_PATH" == "" ]; then
+    TARGET_PATH=$SCREENSHOT_MV_TO
+  fi
+
+#  find $SOURCE_FOLDER -name $FILENAME_PATTERN -print0 | xargs -0 mv -t $TARGET_PATH
 }
 
 # RSync a folder
@@ -33,12 +64,14 @@ echo "Bash version ${BASH_VERSION}..."
 
 local start=$(( ${1#0} +0 ))
 local end=$(( ${2#0} +0 ))
+local uri
 
 echo "Looping from $start to $end..."
 
   for i in $(eval echo {$start..$end})
     do
-      printf $3 $i
+      uri=`printf $3 $i`
+      wget $uri
       echo ''
     done
 echo '---'
@@ -91,7 +124,7 @@ function mount_samba_share(){
   echo "Mounting folder share $1 on host $2 for $SYSTEM_USERNAME"
 
   # mounting folder
-  local mountCommand=`sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD //$2/$1 $mountRoot/$1 &>/dev/null`
+  local mountCommand=`sudo mount -t cifs -o username=$SYSTEM_USERNAME,password=$SYSTEM_PASSWORD,uid=$SYSTEM_USERNAME,gid=$SYSTEM_USERNAME //$2/$1 $mountRoot/$1 &>/dev/null`
 
   if $mountCommand
   then
@@ -251,4 +284,10 @@ confirm () {
             false
             ;;
     esac
+}
+
+function test_assignment()
+{
+  ${1:=$SYSTEM_USERNAME}
+  echo $1
 }

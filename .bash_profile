@@ -11,7 +11,8 @@ else
 	tput sgr0
 fi
 
-for file in ~/dotfiles/.{alias,functions,term}; do
+for file in $PWD/.{alias,functions,term}; do
+	echo "Sourcing $file ..."
 	[ -r "$file" ] && [ -f "$file" ] && source "$file";
 done;
 unset file;
